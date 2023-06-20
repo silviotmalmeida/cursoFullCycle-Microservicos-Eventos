@@ -1,0 +1,4 @@
+- Para iniciar um novo módulo go utiliza-se: go mod init nome-do-módulo (Ex: go mod init github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos);
+
+- Para instalar / atualizar as dependências do go utiliza-se: go mod tidy
+
