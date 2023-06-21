@@ -12,10 +12,10 @@ import (
 // definindo a estrutura (similar à classe)
 type Client struct {
 	// definindo os atributos e seus tipos
-	ID    string
-	Name  string
-	Email string
-	// Accounts  []*Account
+	ID        string
+	Name      string
+	Email     string
+	Accounts  []*Account
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
@@ -23,7 +23,6 @@ type Client struct {
 // definindo o método contrutor
 // devem ser descritos os argumentos e retornos
 func NewClient(name string, email string) (*Client, error) {
-
 	// criando
 	client := &Client{
 		ID:        uuid.New().String(),
@@ -38,7 +37,7 @@ func NewClient(name string, email string) (*Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	// se não existirem erros de validação, retorna somente a estrutura
+	// retorna somente a estrutura
 	return client, nil
 }
 
@@ -74,10 +73,15 @@ func (c *Client) Update(name string, email string) error {
 	return nil
 }
 
-// func (c *Client) AddAccount(account *Account) error {
-// 	if account.Client.ID != c.ID {
-// 		return errors.New("account does not belong to client")
-// 	}
-// 	c.Accounts = append(c.Accounts, account)
-// 	return nil
-// }
+// função de inclusão de account
+// devem ser descritos a estrutura associada, os argumentos e retornos
+func (c *Client) AddAccount(account *Account) error {
+	// se a account fornecida pertencer a outro client, retorna um erro
+	if account.Client.ID != c.ID {
+		return errors.New("account does not belong to client")
+	}
+	// incrementa a lista de accounts do client
+	c.Accounts = append(c.Accounts, account)
+	// não retorna nada
+	return nil
+}
