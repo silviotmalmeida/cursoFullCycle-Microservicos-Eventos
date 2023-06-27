@@ -11,6 +11,7 @@ import (
 // definindo a estrutura (similar à classe)
 // foi incluído o detalhamento da associação com a tabela Client para ser utilizado pelo gorm
 type Account struct {
+	// definindo os atributos e seus tipos
 	ID        string
 	Client    *Client `gorm:"foreignKey:ClientID"`
 	ClientID  string

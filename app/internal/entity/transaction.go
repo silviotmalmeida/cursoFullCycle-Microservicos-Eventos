@@ -12,6 +12,7 @@ import (
 // definindo a estrutura (similar à classe)
 // foi incluído o detalhamento da associação com a tabela Account para ser utilizado pelo gorm
 type Transaction struct {
+	// definindo os atributos e seus tipos
 	ID            string
 	AccountFrom   *Account `gorm:"foreignKey:AccountFromID"`
 	AccountFromID string
