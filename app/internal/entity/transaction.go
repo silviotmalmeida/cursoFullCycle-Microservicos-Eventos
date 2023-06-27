@@ -26,11 +26,13 @@ type Transaction struct {
 func NewTransaction(accountFrom *Account, accountTo *Account, amount float64) (*Transaction, error) {
 	// criando
 	transaction := &Transaction{
-		ID:          uuid.New().String(),
-		AccountFrom: accountFrom,
-		AccountTo:   accountTo,
-		Amount:      amount,
-		CreatedAt:   time.Now(),
+		ID:            uuid.New().String(),
+		AccountFrom:   accountFrom,
+		AccountFromID: accountFrom.ID,
+		AccountTo:     accountTo,
+		AccountToID:   accountTo.ID,
+		Amount:        amount,
+		CreatedAt:     time.Now(),
 	}
 	// validando
 	err := transaction.Validate()

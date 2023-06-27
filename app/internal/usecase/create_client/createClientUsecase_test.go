@@ -15,11 +15,11 @@ import (
 // teste de execução com sucesso
 func TestCreateClientUseCase_Execute(t *testing.T) {
 	// criando o mock
-	clientMock := &mocks.ClientGatewayMock{}
+	clientGatewayMock := &mocks.ClientGatewayMock{}
 	// definindo o retorno do médoto Save como null
-	clientMock.On("Save", mock.Anything).Return(nil)
+	clientGatewayMock.On("Save", mock.Anything).Return(nil)
 	// criando o usecase
-	uc := NewCreateClientUseCase(clientMock)
+	uc := NewCreateClientUseCase(clientGatewayMock)
 	// definindo o input
 	input := &CreateClientInputDTO{
 		Name:  "John Doe",
@@ -33,11 +33,11 @@ func TestCreateClientUseCase_Execute(t *testing.T) {
 	assert.NotNil(t, output)
 	// o ID do do output deve estar preenchido
 	assert.NotEmpty(t, output.ID)
-	// o Name do do output deve correspender ao input
+	// o Name do do output deve corresponder ao input
 	assert.Equal(t, input.Name, output.Name)
-	// o Email do do output deve correspender ao input
+	// o Email do do output deve corresponder ao input
 	assert.Equal(t, input.Email, output.Email)
-	clientMock.AssertExpectations(t)
+	clientGatewayMock.AssertExpectations(t)
 	// o método Save do mock deve ter sido chamado 1 vez
-	clientMock.AssertNumberOfCalls(t, "Save", 1)
+	clientGatewayMock.AssertNumberOfCalls(t, "Save", 1)
 }

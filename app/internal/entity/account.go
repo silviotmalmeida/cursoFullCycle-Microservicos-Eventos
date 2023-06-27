@@ -9,9 +9,10 @@ import (
 )
 
 // definindo a estrutura (similar à classe)
+// foi incluído o detalhamento da associação com a tabela Client para ser utilizado pelo gorm
 type Account struct {
 	ID        string
-	Client    *Client
+	Client    *Client `gorm:"foreignKey:ClientID"`
 	ClientID  string
 	Balance   float64
 	CreatedAt time.Time
@@ -29,6 +30,7 @@ func NewAccount(client *Client) *Account {
 	account := &Account{
 		ID:        uuid.New().String(),
 		Client:    client,
+		ClientID:  client.ID,
 		Balance:   0,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
