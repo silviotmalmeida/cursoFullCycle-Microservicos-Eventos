@@ -1,5 +1,5 @@
 // nome do pacote (está sendo utilizado o nome da referida pasta)
-package database
+package repository
 
 // dependências
 import (
@@ -9,23 +9,23 @@ import (
 )
 
 // definindo a estrutura (similar à classe)
-type ClientDB struct {
+type ClientRepository struct {
 	// definindo os atributos e seus tipos
 	DB *sql.DB
 }
 
 // definindo o método contrutor
 // devem ser descritos os argumentos e retornos
-func NewClientDB(db *sql.DB) *ClientDB {
+func NewClientRepository(db *sql.DB) *ClientRepository {
 	// criando
-	return &ClientDB{
+	return &ClientRepository{
 		DB: db,
 	}
 }
 
 // função de busca por id
 // devem ser descritos a estrutura associada, os argumentos e retornos
-func (c *ClientDB) Get(id string) (*entity.Client, error) {
+func (c *ClientRepository) Get(id string) (*entity.Client, error) {
 	// criando um client vazio
 	client := &entity.Client{}
 	// abrindo a conexão e preparando a query
@@ -38,8 +38,10 @@ func (c *ClientDB) Get(id string) (*entity.Client, error) {
 	defer stmt.Close()
 	// realizando a query
 	row := stmt.QueryRow(id)
-	// populando os dados no client e em caso de erro, retorna somente o erro
-	if err := row.Scan(&client.ID, &client.Name, &client.Email, &client.CreatedAt); err != nil {
+	// populando os dados no client
+	err = row.Scan(&client.ID, &client.Name, &client.Email, &client.CreatedAt)
+	// em caso de erro, retorna somente o erro
+	if err != nil {
 		return nil, err
 	}
 	// senão retorna o client populado
@@ -48,7 +50,7 @@ func (c *ClientDB) Get(id string) (*entity.Client, error) {
 
 // função de criação
 // devem ser descritos a estrutura associada, os argumentos e retornos
-func (c *ClientDB) Save(client *entity.Client) error {
+func (c *ClientRepository) Save(client *entity.Client) error {
 	// abrindo a conexão e preparando a query
 	stmt, err := c.DB.Prepare("INSERT INTO clients (id, name, email, created_at) VALUES (?, ?, ?, ?)")
 	// em caso de erro, retorna somente o erro

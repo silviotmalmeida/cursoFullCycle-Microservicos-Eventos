@@ -1,5 +1,5 @@
 // nome do pacote (está sendo utilizado o nome da referida pasta)
-package database
+package repository
 
 // dependências
 import (
@@ -12,16 +12,16 @@ import (
 )
 
 // criando a suíte de testes
-type ClientDBTestSuite struct {
+type ClientRepositoryTestSuite struct {
 	// definindo os atributos e seus tipos
 	suite.Suite
-	db       *sql.DB
-	clientDB *ClientDB
+	db               *sql.DB
+	clientRepository *ClientRepository
 }
 
 // função de criação da suíte
 // será executado antes de cada teste da suíte
-func (s *ClientDBTestSuite) SetupSuite() {
+func (s *ClientRepositoryTestSuite) SetupSuite() {
 	// definindo o db como sqlite em memória
 	db, err := sql.Open("sqlite3", ":memory:")
 	// não deve retornar erro
@@ -31,12 +31,12 @@ func (s *ClientDBTestSuite) SetupSuite() {
 	// criando a tabela
 	db.Exec("Create table clients (id varchar(255), name varchar(255), email varchar(255), created_at date)")
 	// inicializando o repository
-	s.clientDB = NewClientDB(db)
+	s.clientRepository = NewClientRepository(db)
 }
 
 // função de encerramento da suíte
 // será executado depois de cada teste da suíte
-func (s *ClientDBTestSuite) TearDownSuite() {
+func (s *ClientRepositoryTestSuite) TearDownSuite() {
 	// deve-se fechar a conexão ao fim da função
 	defer s.db.Close()
 	// removendo a tabela
@@ -44,14 +44,14 @@ func (s *ClientDBTestSuite) TearDownSuite() {
 }
 
 // inicializando a suíte como um teste geral
-func TestClientDBTestSuite(t *testing.T) {
-	suite.Run(t, new(ClientDBTestSuite))
+func TestClientRepositoryTestSuite(t *testing.T) {
+	suite.Run(t, new(ClientRepositoryTestSuite))
 }
 
 // testes de unidade
 
 // teste de criação com sucesso
-func (s *ClientDBTestSuite) TestSave() {
+func (s *ClientRepositoryTestSuite) TestSave() {
 	// criando um client
 	client := &entity.Client{
 		ID:    "1",
@@ -59,19 +59,19 @@ func (s *ClientDBTestSuite) TestSave() {
 		Email: "j@j.com",
 	}
 	// salvando no db
-	err := s.clientDB.Save(client)
+	err := s.clientRepository.Save(client)
 	// não deve retornar erro
 	s.Nil(err)
 }
 
 // teste de busca por id com sucesso
-func (s *ClientDBTestSuite) TestGet() {
+func (s *ClientRepositoryTestSuite) TestGet() {
 	// criando um client, desconsiderando o retorno do erro
 	client, _ := entity.NewClient("John", "j@j.com")
 	// salvando no db
-	s.clientDB.Save(client)
+	s.clientRepository.Save(client)
 	// consultando no db
-	clientDB, err := s.clientDB.Get(client.ID)
+	clientDB, err := s.clientRepository.Get(client.ID)
 	// não deve retornar erro
 	s.Nil(err)
 	// os atributos devem estar consistentes com a entrada
