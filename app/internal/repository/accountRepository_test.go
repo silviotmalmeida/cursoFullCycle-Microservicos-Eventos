@@ -48,7 +48,7 @@ func (s *AccountRepositoryTestSuite) TearDownSuite() {
 }
 
 // inicializando a suíte como um teste geral
-func TestAccountDBTestSuite(t *testing.T) {
+func TestAccountRepositoryTestSuite(t *testing.T) {
 	suite.Run(t, new(AccountRepositoryTestSuite))
 }
 
