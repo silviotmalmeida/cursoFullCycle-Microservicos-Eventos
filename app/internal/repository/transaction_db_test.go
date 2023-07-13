@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-// definindo a estrutura (similar à classe)
+// definindo a suíte de testes
 type TransactionRepositoryTestSuite struct {
 	// definindo os atributos e seus tipos
 	suite.Suite

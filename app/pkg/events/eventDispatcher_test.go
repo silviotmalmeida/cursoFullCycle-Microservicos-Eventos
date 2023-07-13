@@ -1,5 +1,7 @@
+// nome do pacote (está sendo utilizado o nome da referida pasta)
 package events
 
+// dependências
 import (
 	"sync"
 	"testing"
@@ -10,6 +12,8 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
+// criando um struct que implemente a EventInterface
+// ----------------------------------------------------
 type TestEvent struct {
 	Name    string
 	Payload interface{}
@@ -31,6 +35,10 @@ func (e *TestEvent) SetPayload(payload interface{}) {
 	e.Payload = payload
 }
 
+// ----------------------------------------------------
+
+// criando um struct que implemente a EventHandlerInterface
+// ----------------------------------------------------
 type TestEventHandler struct {
 	ID int
 }
@@ -38,19 +46,27 @@ type TestEventHandler struct {
 func (h *TestEventHandler) Handle(event EventInterface, wg *sync.WaitGroup) {
 }
 
+// ----------------------------------------------------
+
+// definindo a suíte de testes
 type EventDispatcherTestSuite struct {
+	// definindo os atributos e seus tipos
 	suite.Suite
-	event           TestEvent
+	event1          TestEvent
 	event2          TestEvent
-	handler         TestEventHandler
+	handler1        TestEventHandler
 	handler2        TestEventHandler
 	handler3        TestEventHandler
 	eventDispatcher *EventDispatcher
 }
 
+// função de criação da suíte
+// será executado antes de cada teste da suíte
 func (suite *EventDispatcherTestSuite) SetupTest() {
+	// setando o dispatcher
 	suite.eventDispatcher = NewEventDispatcher()
-	suite.handler = TestEventHandler{
+	// setando os handlers
+	suite.handler1 = TestEventHandler{
 		ID: 1,
 	}
 	suite.handler2 = TestEventHandler{
@@ -59,119 +75,180 @@ func (suite *EventDispatcherTestSuite) SetupTest() {
 	suite.handler3 = TestEventHandler{
 		ID: 3,
 	}
-	suite.event = TestEvent{Name: "test", Payload: "test"}
+	// setando os eventos
+	suite.event1 = TestEvent{Name: "test", Payload: "test"}
 	suite.event2 = TestEvent{Name: "test2", Payload: "test2"}
 }
 
+// inicializando a suíte como um teste geral
+func TestSuite(t *testing.T) {
+	suite.Run(t, new(EventDispatcherTestSuite))
+}
+
+// testes de unidade do dispatcher
+
+// teste de registro com sucesso
 func (suite *EventDispatcherTestSuite) TestEventDispatcher_Register() {
-	err := suite.eventDispatcher.Register(suite.event.GetName(), &suite.handler)
+	// registrando o event 1 com o handler 1
+	err := suite.eventDispatcher.Register(suite.event1.GetName(), &suite.handler1)
+	// não deve retornar erro
 	suite.Nil(err)
-	suite.Equal(1, len(suite.eventDispatcher.handlers[suite.event.GetName()]))
+	// a quantidade de handlers para o event 1 deve ser 1
+	suite.Equal(1, len(suite.eventDispatcher.handlers[suite.event1.GetName()]))
 
-	err = suite.eventDispatcher.Register(suite.event.GetName(), &suite.handler2)
+	// registrando o event 1 com o handler 2
+	err = suite.eventDispatcher.Register(suite.event1.GetName(), &suite.handler2)
+	// não deve retornar erro
 	suite.Nil(err)
-	suite.Equal(2, len(suite.eventDispatcher.handlers[suite.event.GetName()]))
+	// a quantidade de handlers para o event 1 deve ser 2
+	suite.Equal(2, len(suite.eventDispatcher.handlers[suite.event1.GetName()]))
 
-	assert.Equal(suite.T(), &suite.handler, suite.eventDispatcher.handlers[suite.event.GetName()][0])
-	assert.Equal(suite.T(), &suite.handler2, suite.eventDispatcher.handlers[suite.event.GetName()][1])
+	// no array de handlers do event 1, o handler 1 deve estar na posição 0
+	suite.Equal(&suite.handler1, suite.eventDispatcher.handlers[suite.event1.GetName()][0])
+	// no array de handlers do event 1, o handler 1 deve estar na posição 1
+	suite.Equal(&suite.handler2, suite.eventDispatcher.handlers[suite.event1.GetName()][1])
 }
 
+// teste de registro sem sucesso, com handler repetido
 func (suite *EventDispatcherTestSuite) TestEventDispatcher_Register_WithSameHandler() {
-	err := suite.eventDispatcher.Register(suite.event.GetName(), &suite.handler)
+	// registrando o event 1 com o handler 1
+	err := suite.eventDispatcher.Register(suite.event1.GetName(), &suite.handler1)
+	// não deve retornar erro
 	suite.Nil(err)
-	suite.Equal(1, len(suite.eventDispatcher.handlers[suite.event.GetName()]))
+	// a quantidade de handlers para o event 1 deve ser 1
+	suite.Equal(1, len(suite.eventDispatcher.handlers[suite.event1.GetName()]))
 
-	err = suite.eventDispatcher.Register(suite.event.GetName(), &suite.handler)
+	// registrando o event 1 com o handler 1 novamente
+	err = suite.eventDispatcher.Register(suite.event1.GetName(), &suite.handler1)
+	// deve retornar um erro do tipo ErrHandlerAlreadyRegistered
 	suite.Equal(ErrHandlerAlreadyRegistered, err)
-	suite.Equal(1, len(suite.eventDispatcher.handlers[suite.event.GetName()]))
+	// a quantidade de handlers para o event 1 deve permanecer em 1
+	suite.Equal(1, len(suite.eventDispatcher.handlers[suite.event1.GetName()]))
 }
 
+// teste de remoção total dos registros com sucesso
 func (suite *EventDispatcherTestSuite) TestEventDispatcher_Clear() {
-	// Event 1
-	err := suite.eventDispatcher.Register(suite.event.GetName(), &suite.handler)
+	// registrando o event 1 com o handler 1
+	err := suite.eventDispatcher.Register(suite.event1.GetName(), &suite.handler1)
+	// não deve retornar erro
 	suite.Nil(err)
-	suite.Equal(1, len(suite.eventDispatcher.handlers[suite.event.GetName()]))
+	// a quantidade de handlers para o event 1 deve ser 1
+	suite.Equal(1, len(suite.eventDispatcher.handlers[suite.event1.GetName()]))
 
-	err = suite.eventDispatcher.Register(suite.event.GetName(), &suite.handler2)
+	// registrando o event 1 com o handler 2
+	err = suite.eventDispatcher.Register(suite.event1.GetName(), &suite.handler2)
+	// não deve retornar erro
 	suite.Nil(err)
-	suite.Equal(2, len(suite.eventDispatcher.handlers[suite.event.GetName()]))
+	// a quantidade de handlers para o event 1 deve ser 2
+	suite.Equal(2, len(suite.eventDispatcher.handlers[suite.event1.GetName()]))
 
-	// Event 2
+	// registrando o event 2 com o handler 3
 	err = suite.eventDispatcher.Register(suite.event2.GetName(), &suite.handler3)
+	// não deve retornar erro
 	suite.Nil(err)
+	// a quantidade de handlers para o event 2 deve ser 1
 	suite.Equal(1, len(suite.eventDispatcher.handlers[suite.event2.GetName()]))
 
+	// removendo todos os registros
 	suite.eventDispatcher.Clear()
+	// a quantidade total de registros deve ser 0
 	suite.Equal(0, len(suite.eventDispatcher.handlers))
 }
 
+// teste de remoção total dos registros com sucesso
 func (suite *EventDispatcherTestSuite) TestEventDispatcher_Has() {
-	// Event 1
-	err := suite.eventDispatcher.Register(suite.event.GetName(), &suite.handler)
+	// registrando o event 1 com o handler 1
+	err := suite.eventDispatcher.Register(suite.event1.GetName(), &suite.handler1)
+	// não deve retornar erro
 	suite.Nil(err)
-	suite.Equal(1, len(suite.eventDispatcher.handlers[suite.event.GetName()]))
+	// a quantidade de handlers para o event 1 deve ser 1
+	suite.Equal(1, len(suite.eventDispatcher.handlers[suite.event1.GetName()]))
 
-	err = suite.eventDispatcher.Register(suite.event.GetName(), &suite.handler2)
+	// registrando o event 1 com o handler 2
+	err = suite.eventDispatcher.Register(suite.event1.GetName(), &suite.handler2)
+	// não deve retornar erro
 	suite.Nil(err)
-	suite.Equal(2, len(suite.eventDispatcher.handlers[suite.event.GetName()]))
+	// a quantidade de handlers para o event 1 deve ser 2
+	suite.Equal(2, len(suite.eventDispatcher.handlers[suite.event1.GetName()]))
 
-	assert.True(suite.T(), suite.eventDispatcher.Has(suite.event.GetName(), &suite.handler))
-	assert.True(suite.T(), suite.eventDispatcher.Has(suite.event.GetName(), &suite.handler2))
-	assert.False(suite.T(), suite.eventDispatcher.Has(suite.event.GetName(), &suite.handler3))
+	// o event 1 deve estar registrado com o handler 1
+	suite.True(suite.eventDispatcher.Has(suite.event1.GetName(), &suite.handler1))
+	// o event 1 deve estar registrado com o handler 2
+	suite.True(suite.eventDispatcher.Has(suite.event1.GetName(), &suite.handler2))
+	// o event 1 não deve estar registrado com o handler 3
+	suite.False(suite.eventDispatcher.Has(suite.event1.GetName(), &suite.handler3))
 }
 
+// teste de remoção individual dos registros com sucesso
 func (suite *EventDispatcherTestSuite) TestEventDispatcher_Remove() {
-	// Event 1
-	err := suite.eventDispatcher.Register(suite.event.GetName(), &suite.handler)
+	// registrando o event 1 com o handler 1
+	err := suite.eventDispatcher.Register(suite.event1.GetName(), &suite.handler1)
+	// não deve retornar erro
 	suite.Nil(err)
-	suite.Equal(1, len(suite.eventDispatcher.handlers[suite.event.GetName()]))
+	// a quantidade de handlers para o event 1 deve ser 1
+	suite.Equal(1, len(suite.eventDispatcher.handlers[suite.event1.GetName()]))
 
-	err = suite.eventDispatcher.Register(suite.event.GetName(), &suite.handler2)
+	// registrando o event 1 com o handler 2
+	err = suite.eventDispatcher.Register(suite.event1.GetName(), &suite.handler2)
+	// não deve retornar erro
 	suite.Nil(err)
-	suite.Equal(2, len(suite.eventDispatcher.handlers[suite.event.GetName()]))
+	// a quantidade de handlers para o event 1 deve ser 2
+	suite.Equal(2, len(suite.eventDispatcher.handlers[suite.event1.GetName()]))
 
-	// Event 2
+	// registrando o event 2 com o handler 3
 	err = suite.eventDispatcher.Register(suite.event2.GetName(), &suite.handler3)
+	// não deve retornar erro
 	suite.Nil(err)
+	// a quantidade de handlers para o event 2 deve ser 1
 	suite.Equal(1, len(suite.eventDispatcher.handlers[suite.event2.GetName()]))
 
-	suite.eventDispatcher.Remove(suite.event.GetName(), &suite.handler)
-	suite.Equal(1, len(suite.eventDispatcher.handlers[suite.event.GetName()]))
-	assert.Equal(suite.T(), &suite.handler2, suite.eventDispatcher.handlers[suite.event.GetName()][0])
+	// removendo o handler 1 do event 1
+	suite.eventDispatcher.Remove(suite.event1.GetName(), &suite.handler1)
+	// a quantidade de handlers para o event 1 deve ser 1
+	suite.Equal(1, len(suite.eventDispatcher.handlers[suite.event1.GetName()]))
+	// no array de handlers do event 1, o handler 1 deve estar na posição 0
+	assert.Equal(suite.T(), &suite.handler2, suite.eventDispatcher.handlers[suite.event1.GetName()][0])
 
-	suite.eventDispatcher.Remove(suite.event.GetName(), &suite.handler2)
-	suite.Equal(0, len(suite.eventDispatcher.handlers[suite.event.GetName()]))
+	// removendo o handler 2 do event 1
+	suite.eventDispatcher.Remove(suite.event1.GetName(), &suite.handler2)
+	// a quantidade de handlers para o event 1 deve ser 0
+	suite.Equal(0, len(suite.eventDispatcher.handlers[suite.event1.GetName()]))
 
+	// removendo o handler 3 do event 2
 	suite.eventDispatcher.Remove(suite.event2.GetName(), &suite.handler3)
+	// a quantidade de handlers para o event 2 deve ser 0
 	suite.Equal(0, len(suite.eventDispatcher.handlers[suite.event2.GetName()]))
 }
 
+// criando um mock para o handler
 type MockHandler struct {
 	mock.Mock
 }
 
+// definindo o comportamento do método handle do mock
 func (m *MockHandler) Handle(event EventInterface, wg *sync.WaitGroup) {
 	m.Called(event)
 	wg.Done()
 }
 
+// teste de disparo das ações registradas com sucesso
 func (suite *EventDispatcherTestSuite) TestEventDispatch_Dispatch() {
-	eh := &MockHandler{}
-	eh.On("Handle", &suite.event)
+	// criando o handler 1 mockado
+	handler1 := &MockHandler{}
+	handler1.On("Handle", &suite.event1)
 
-	eh2 := &MockHandler{}
-	eh2.On("Handle", &suite.event)
+	// criando o handler 2 mockado
+	handler2 := &MockHandler{}
+	handler2.On("Handle", &suite.event1)
 
-	suite.eventDispatcher.Register(suite.event.GetName(), eh)
-	suite.eventDispatcher.Register(suite.event.GetName(), eh2)
+	// registrando os events e handlers
+	suite.eventDispatcher.Register(suite.event1.GetName(), handler1)
+	suite.eventDispatcher.Register(suite.event1.GetName(), handler2)
 
-	suite.eventDispatcher.Dispatch(&suite.event)
-	eh.AssertExpectations(suite.T())
-	eh2.AssertExpectations(suite.T())
-	eh.AssertNumberOfCalls(suite.T(), "Handle", 1)
-	eh2.AssertNumberOfCalls(suite.T(), "Handle", 1)
-}
-
-func TestSuite(t *testing.T) {
-	suite.Run(t, new(EventDispatcherTestSuite))
+	// disparando as ações relacionadas ao event1
+	suite.eventDispatcher.Dispatch(&suite.event1)
+	// o método handle do handler1 deve ter sido executado 1 vez
+	handler1.AssertNumberOfCalls(suite.T(), "Handle", 1)
+	// o método handle do handler2 deve ter sido executado 1 vez
+	handler2.AssertNumberOfCalls(suite.T(), "Handle", 1)
 }

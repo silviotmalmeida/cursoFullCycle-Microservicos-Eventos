@@ -10,7 +10,7 @@ import (
 // criando um erro customizado para handler já registrado
 var ErrHandlerAlreadyRegistered = errors.New("handler already registered")
 
-// definindo a estrutura (similar à classe)
+// definindo a estrutura (similar à classe) que implemente a EventDispatcherInterface
 type EventDispatcher struct {
 	// definindo os atributos e seus tipos
 	// definindo um map com chave=string e valor=array de handlers
