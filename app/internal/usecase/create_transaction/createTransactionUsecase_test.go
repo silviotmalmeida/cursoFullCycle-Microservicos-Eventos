@@ -6,7 +6,9 @@ import (
 	"testing"
 
 	"github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos/internal/entity"
+	"github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos/internal/event"
 	"github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos/internal/usecase/mocks"
+	"github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos/pkg/events"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -37,8 +39,12 @@ func TestCreateTransactionUseCase_Execute(t *testing.T) {
 	transactionGatewayMock := &mocks.TransactionGatewayMock{}
 	// definindo o retorno do médoto Save como null
 	transactionGatewayMock.On("Create", mock.Anything).Return(nil)
+	// criando o dispatcher
+	eventDispatcher := events.NewEventDispatcher()
+	// criando o event
+	transactionCreatedEvent := event.NewTransactionCreatedEvent()
 	// criando o usecase
-	uc := NewCreateTransactionUseCase(transactionGatewayMock, accountGatewayMock)
+	uc := NewCreateTransactionUseCase(transactionGatewayMock, accountGatewayMock, eventDispatcher, transactionCreatedEvent)
 	// definindo o input
 	input := &CreateTransactionInputDTO{
 		AccountIDFrom: account1.ID,

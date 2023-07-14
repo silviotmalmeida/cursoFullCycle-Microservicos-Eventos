@@ -5,6 +5,7 @@ package create_transaction
 import (
 	"github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos/internal/entity"
 	"github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos/internal/gateway"
+	"github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos/pkg/events"
 )
 
 // definindo os dados de input
@@ -26,21 +27,28 @@ type CreateTransactionOutputDTO struct {
 
 // definindo o usecase (sem o gerenciamento da transação com unity of work)
 type CreateTransactionUseCase struct {
-	TransactionGateway gateway.TransactionGateway
-	AccountGateway     gateway.AccountGateway
+	TransactionGateway      gateway.TransactionGateway
+	AccountGateway          gateway.AccountGateway
+	EventDispatcher         events.EventDispatcherInterface
+	TransactionCreatedEvent events.EventInterface
 }
 
 // definindo o método contrutor (sem o gerenciamento da transação com unity of work)
 // devem ser descritos os argumentos e retornos
 func NewCreateTransactionUseCase(
-	transactionGateway gateway.TransactionGateway, accountGateway gateway.AccountGateway) *CreateTransactionUseCase {
+	transactionGateway gateway.TransactionGateway,
+	accountGateway gateway.AccountGateway,
+	eventDispatcher events.EventDispatcherInterface,
+	transactionCreatedEvent events.EventInterface) *CreateTransactionUseCase {
 	return &CreateTransactionUseCase{
-		TransactionGateway: transactionGateway,
-		AccountGateway:     accountGateway,
+		TransactionGateway:      transactionGateway,
+		AccountGateway:          accountGateway,
+		EventDispatcher:         eventDispatcher,
+		TransactionCreatedEvent: transactionCreatedEvent,
 	}
 }
 
-// função de execução do usecase (sem o gerenciamento da transação com unity of work)
+// função de execução do usecase (sem o gerenciamento da transação com unity of work - uow)
 // devem ser descritos a estrutura associada, os argumentos e retornos
 func (uc *CreateTransactionUseCase) Execute(input *CreateTransactionInputDTO) (*CreateTransactionOutputDTO, error) {
 	// consultando o accountFrom
@@ -74,6 +82,13 @@ func (uc *CreateTransactionUseCase) Execute(input *CreateTransactionInputDTO) (*
 		AccountIDTo:   transaction.AccountToID,
 		Amount:        transaction.Amount,
 	}
+
+	// populando o evento com o output do usecase
+	uc.TransactionCreatedEvent.SetPayload(output)
+
+	// disparando as ações associadas ao evento TransactionCreatedEvent
+	uc.EventDispatcher.Dispatch(uc.TransactionCreatedEvent)
+
 	// retornando o output, com erro nulo
 	return output, nil
 }
