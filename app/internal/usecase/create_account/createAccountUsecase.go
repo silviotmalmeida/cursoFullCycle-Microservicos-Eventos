@@ -34,7 +34,7 @@ func NewCreateAccountUseCase(accountGateway gateway.AccountGateway, clientGatewa
 
 // função de execução do usecase
 // devem ser descritos a estrutura associada, os argumentos e retornos
-func (uc *CreateAccountUseCase) Execute(input CreateAccountInputDTO) (*CreateAccountOutputDTO, error) {
+func (uc *CreateAccountUseCase) Execute(input *CreateAccountInputDTO) (*CreateAccountOutputDTO, error) {
 	// criando o client
 	client, err := uc.ClientGateway.Get(input.ClientID)
 	// se existirem erros, retorna somente o erro

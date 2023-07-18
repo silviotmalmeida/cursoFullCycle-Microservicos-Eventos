@@ -11,6 +11,8 @@ import (
 	"github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos/internal/usecase/create_account"
 	"github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos/internal/usecase/create_client"
 	"github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos/internal/usecase/create_transaction"
+	"github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos/internal/web"
+	"github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos/internal/web/webserver"
 	"github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos/pkg/events"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -61,16 +63,20 @@ func main() {
 	createTransactionUseCase := create_transaction.NewCreateTransactionUseCase(transactionDb, accountDb, eventDispatcher, transactionCreatedEvent)
 	// createTransactionUseCase := create_transaction.NewCreateTransactionUseCase(uow, eventDispatcher, transactionCreatedEvent, balanceUpdatedEvent)
 
+	// criando o webserver e definindo a porta a ser utilizada
 	webserver := webserver.NewWebServer(":8080")
 
+	// criando os handlers dos endpoints
 	clientHandler := web.NewWebClientHandler(*createClientUseCase)
 	accountHandler := web.NewWebAccountHandler(*createAccountUseCase)
 	transactionHandler := web.NewWebTransactionHandler(*createTransactionUseCase)
 
+	// adicionando os handlers ao webserver e configurando os endpoints
 	webserver.AddHandler("/clients", clientHandler.CreateClient)
 	webserver.AddHandler("/accounts", accountHandler.CreateAccount)
 	webserver.AddHandler("/transactions", transactionHandler.CreateTransaction)
 
+	// inicializando o webserver
 	fmt.Println("Server is running")
 	webserver.Start()
 }

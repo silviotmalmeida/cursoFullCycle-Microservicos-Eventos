@@ -28,7 +28,7 @@ func TestCreateAccountUseCase_Execute(t *testing.T) {
 	// criando o usecase
 	uc := NewCreateAccountUseCase(accountGatewayMock, clientGatewayMock)
 	// definindo o input
-	input := CreateAccountInputDTO{
+	input := &CreateAccountInputDTO{
 		ClientID: client.ID,
 	}
 	// executando o usecase
