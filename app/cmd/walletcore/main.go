@@ -64,7 +64,8 @@ func main() {
 	// createTransactionUseCase := create_transaction.NewCreateTransactionUseCase(uow, eventDispatcher, transactionCreatedEvent, balanceUpdatedEvent)
 
 	// criando o webserver e definindo a porta a ser utilizada
-	webserver := webserver.NewWebServer(":8080")
+	port := "8080"
+	webserver := webserver.NewWebServer(":" + port)
 
 	// criando os handlers dos endpoints
 	clientHandler := web.NewWebClientHandler(*createClientUseCase)
@@ -77,6 +78,6 @@ func main() {
 	webserver.AddHandler("/transactions", transactionHandler.CreateTransaction)
 
 	// inicializando o webserver
-	fmt.Println("Server is running")
+	fmt.Println("Server is running on port", port)
 	webserver.Start()
 }

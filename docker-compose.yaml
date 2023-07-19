@@ -17,10 +17,11 @@ services:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: wallet
       MYSQL_PASSWORD: root
-    ports:
-      - 3306:3306
+    container_name: mysql
     volumes:
       - ./app/docker/mysql:/var/lib/mysql
+    ports:
+      - 3306:3306
 
   # zookeeper:
   #   image: "confluentinc/cp-zookeeper:6.1.0"

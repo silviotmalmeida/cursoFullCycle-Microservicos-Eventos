@@ -1,0 +1,51 @@
+# criando o client 1
+POST http://localhost:8080/clients HTTP/1.1
+Content-Type: application/json
+
+{
+    "name": "John Doe",
+    "email": "john@j.com"
+}
+
+###
+
+# criando o client 2
+POST http://localhost:8080/clients HTTP/1.1
+Content-Type: application/json
+
+{
+    "name": "Jane Doe",
+    "email": "jane@j.com"
+}
+
+###
+
+# criando o account para o client 1
+POST http://localhost:8080/accounts HTTP/1.1
+Content-Type: application/json
+
+{
+    "client_id": "b0def560-0f2d-4134-8c78-72545929acc2"
+}
+
+###
+
+# criando o account para o client 2
+POST http://localhost:8080/accounts HTTP/1.1
+Content-Type: application/json
+
+{
+    "client_id": "b762dcec-5e50-4904-a344-169ed935eb34"
+}
+
+###
+
+# criando a transaction
+POST http://localhost:8080/transactions HTTP/1.1
+Content-Type: application/json
+
+{
+    "account_id_from": "73a3aa41-3fbd-4355-b155-ae578c1f6399",
+    "account_id_to": "ed8abbec-8065-4b89-a890-e0a16fd91b8d",
+    "amount": 10
+}
