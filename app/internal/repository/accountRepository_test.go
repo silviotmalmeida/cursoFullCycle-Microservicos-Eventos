@@ -35,6 +35,10 @@ func (s *AccountRepositoryTestSuite) SetupSuite() {
 	s.accountRepository = NewAccountRepository(db)
 	// criando um client
 	s.client, _ = entity.NewClient("John", "j@j.com")
+	// inserindo o client no db
+	s.db.Exec("Insert into clients (id, name, email, created_at) values (?, ?, ?, ?)",
+		s.client.ID, s.client.Name, s.client.Email, s.client.CreatedAt,
+	)
 }
 
 // função de encerramento da suíte
@@ -66,10 +70,6 @@ func (s *AccountRepositoryTestSuite) TestSave() {
 
 // teste de busca por id com sucesso
 func (s *AccountRepositoryTestSuite) TestFindByID() {
-	// inserindo o client no db
-	s.db.Exec("Insert into clients (id, name, email, created_at) values (?, ?, ?, ?)",
-		s.client.ID, s.client.Name, s.client.Email, s.client.CreatedAt,
-	)
 	// criando a account
 	account := entity.NewAccount(s.client)
 	// salvando no db

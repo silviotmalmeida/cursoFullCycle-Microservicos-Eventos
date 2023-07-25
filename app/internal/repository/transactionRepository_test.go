@@ -42,6 +42,13 @@ func (s *TransactionRepositoryTestSuite) SetupSuite() {
 	client2, err := entity.NewClient("John2", "jj@j.com")
 	s.Nil(err)
 	s.client2 = client2
+	// inserindo os clients no db
+	s.db.Exec("Insert into clients (id, name, email, created_at) values (?, ?, ?, ?)",
+		s.client.ID, s.client.Name, s.client.Email, s.client.CreatedAt,
+	)
+	s.db.Exec("Insert into clients (id, name, email, created_at) values (?, ?, ?, ?)",
+		s.client2.ID, s.client2.Name, s.client2.Email, s.client2.CreatedAt,
+	)
 	// criando e atribuindo os accounts
 	accountFrom := entity.NewAccount(s.client)
 	accountFrom.Balance = 1000
@@ -49,6 +56,13 @@ func (s *TransactionRepositoryTestSuite) SetupSuite() {
 	accountTo := entity.NewAccount(s.client2)
 	accountTo.Balance = 1000
 	s.accountTo = accountTo
+	// inserindo os accounts no db
+	s.db.Exec("Insert into accounts (id, client_id, balance, created_at) values (?, ?, ?, ?)",
+		s.accountFrom.ID, s.accountFrom.ClientID, s.accountFrom.Balance, s.accountFrom.CreatedAt,
+	)
+	s.db.Exec("Insert into accounts (id, client_id, balance, created_at) values (?, ?, ?, ?)",
+		s.accountTo.ID, s.accountTo.ClientID, s.accountTo.Balance, s.accountTo.CreatedAt,
+	)
 	// inicializando o repository
 	s.transactionRepository = NewTransactionRepository(db)
 }

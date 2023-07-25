@@ -69,6 +69,18 @@ func (uc *CreateTransactionUseCase) Execute(input *CreateTransactionInputDTO) (*
 	if err != nil {
 		return nil, err
 	}
+	// atualizando o balance da accountFrom
+	err = uc.AccountGateway.UpdateBalance(accountFrom)
+	// se existirem erros, retorna somente o erro
+	if err != nil {
+		return nil, err
+	}
+	// atualizando o balance da accountTo
+	err = uc.AccountGateway.UpdateBalance(accountTo)
+	// se existirem erros, retorna somente o erro
+	if err != nil {
+		return nil, err
+	}
 	// salvando no BD
 	err = uc.TransactionGateway.Create(transaction)
 	// se existirem erros, retorna somente o erro
