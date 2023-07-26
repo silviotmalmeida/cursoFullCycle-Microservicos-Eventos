@@ -77,25 +77,4 @@ func TestCreateTransactionUseCase_Execute(t *testing.T) {
 	accountGatewayMock.AssertNumberOfCalls(t, "UpdateBalance", 2)
 	// o método Create do mock deve ter sido chamado 1 vez
 	transactionGatewayMock.AssertNumberOfCalls(t, "Create", 1)
-
-	// mockUow := &mocks.UowMock{}
-	// mockUow.On("Do", mock.Anything, mock.Anything).Return(nil)
-
-	// inputDto := CreateTransactionInputDTO{
-	// 	AccountIDFrom: account1.ID,
-	// 	AccountIDTo:   account2.ID,
-	// 	Amount:        100,
-	// }
-
-	// dispatcher := events.NewEventDispatcher()
-	// eventTransaction := event.NewTransactionCreated()
-	// eventBalance := event.NewBalanceUpdated()
-	// ctx := context.Background()
-
-	// uc := NewCreateTransactionUseCase(mockUow, dispatcher, eventTransaction, eventBalance)
-	// output, err := uc.Execute(ctx, inputDto)
-	// assert.Nil(t, err)
-	// assert.NotNil(t, output)
-	// mockUow.AssertExpectations(t)
-	// mockUow.AssertNumberOfCalls(t, "Do", 1)
 }

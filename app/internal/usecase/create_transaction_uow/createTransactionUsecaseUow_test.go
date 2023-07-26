@@ -3,6 +3,7 @@ package create_transaction_uow
 
 // dependências
 import (
+	"context"
 	"testing"
 
 	"github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos/internal/entity"
@@ -29,73 +30,33 @@ func TestCreateTransactionUseCaseUow_Execute(t *testing.T) {
 	account2 := entity.NewAccount(client2)
 	// creditando no account 2
 	account2.Credit(1000)
-	// criando o accountMock
-	accountGatewayMock := &mocks.AccountGatewayMock{}
-	// definindo o retorno do médoto FindByID para a account 1, como account 1 e erro null
-	accountGatewayMock.On("FindByID", account1.ID).Return(account1, nil)
-	// definindo o retorno do médoto FindByID para a account 2, como account 2 e erro null
-	accountGatewayMock.On("FindByID", account2.ID).Return(account2, nil)
-	// definindo o retorno do médoto UpdateBalance para a account 1, como erro null
-	accountGatewayMock.On("UpdateBalance", account1).Return(nil)
-	// definindo o retorno do médoto UpdateBalance para a account 2, como erro null
-	accountGatewayMock.On("UpdateBalance", account2).Return(nil)
-	// criando o transactionMock
-	transactionGatewayMock := &mocks.TransactionGatewayMock{}
-	// definindo o retorno do médoto Save como null
-	transactionGatewayMock.On("Create", mock.Anything).Return(nil)
-	// criando o dispatcher
-	eventDispatcher := events.NewEventDispatcher()
-	// criando o event
-	transactionCreatedEvent := event.NewTransactionCreatedEvent()
-	// criando o usecase
-	uc := NewCreateTransactionUseCaseUow(transactionGatewayMock, accountGatewayMock, eventDispatcher, transactionCreatedEvent)
+	// criando o mock do uow
+	mockUow := &mocks.UowMock{}
+	// definindo o retorno do médoto Do como null
+	mockUow.On("Do", mock.Anything, mock.Anything).Return(nil)
 	// definindo o input
-	input := &CreateTransactionInputDTO{
+	inputDto := CreateTransactionInputDTO{
 		AccountIDFrom: account1.ID,
 		AccountIDTo:   account2.ID,
 		Amount:        100,
 	}
+	// criando o dispatcher
+	eventDispatcher := events.NewEventDispatcher()
+	// criando o event
+	eventTransaction := event.NewTransactionCreatedEvent()
+	// criando o event
+	eventBalance := event.NewBalanceUpdatedEvent()
+	// criando o contexto
+	ctx := context.Background()
+	// criando o usecase
+	uc := NewCreateTransactionUseCaseUow(mockUow, eventDispatcher, eventTransaction, eventBalance)
 	// executando o usecase
-	output, err := uc.Execute(input)
+	output, err := uc.Execute(ctx, inputDto)
 	// não deve retornar erro
 	assert.Nil(t, err)
 	// deve retornar um output válido
 	assert.NotNil(t, output)
-	// o ID do do output deve estar preenchido
-	assert.NotEmpty(t, output.ID)
-	// o AccountIDFrom do do output deve corresponder ao input
-	assert.Equal(t, input.AccountIDFrom, output.AccountIDFrom)
-	// o AccountIDTo do do output deve corresponder ao input
-	assert.Equal(t, input.AccountIDTo, output.AccountIDTo)
-	// o Amount do do output deve corresponder ao input
-	assert.Equal(t, input.Amount, output.Amount)
-	accountGatewayMock.AssertExpectations(t)
-	transactionGatewayMock.AssertExpectations(t)
-	// o método FindByID do mock deve ter sido chamado 2 vezes
-	accountGatewayMock.AssertNumberOfCalls(t, "FindByID", 2)
-	// o método UpdateBalance do mock deve ter sido chamado 2 vezes
-	accountGatewayMock.AssertNumberOfCalls(t, "UpdateBalance", 2)
-	// o método Create do mock deve ter sido chamado 1 vez
-	transactionGatewayMock.AssertNumberOfCalls(t, "Create", 1)
-
-	// mockUow := &mocks.UowMock{}
-	// mockUow.On("Do", mock.Anything, mock.Anything).Return(nil)
-
-	// inputDto := CreateTransactionInputDTO{
-	// 	AccountIDFrom: account1.ID,
-	// 	AccountIDTo:   account2.ID,
-	// 	Amount:        100,
-	// }
-
-	// dispatcher := events.NewEventDispatcher()
-	// eventTransaction := event.NewTransactionCreated()
-	// eventBalance := event.NewBalanceUpdated()
-	// ctx := context.Background()
-
-	// uc := NewCreateTransactionUseCase(mockUow, dispatcher, eventTransaction, eventBalance)
-	// output, err := uc.Execute(ctx, inputDto)
-	// assert.Nil(t, err)
-	// assert.NotNil(t, output)
-	// mockUow.AssertExpectations(t)
-	// mockUow.AssertNumberOfCalls(t, "Do", 1)
+	mockUow.AssertExpectations(t)
+	// o método Do do mock deve ter sido chamado 1 VEZ
+	mockUow.AssertNumberOfCalls(t, "Do", 1)
 }
