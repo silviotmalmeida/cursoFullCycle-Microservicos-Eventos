@@ -22,15 +22,15 @@ type AccountRepositoryTestSuite struct {
 // função de criação da suíte
 // será executado antes de cada teste da suíte
 func (s *AccountRepositoryTestSuite) SetupSuite() {
-	// definindo o db como sqlite em memória
-	db, err := sql.Open("sqlite3", ":memory:")
+	// definindo o db como sqlite em memória, com as restrições de chave estrangeira ativadas
+	db, err := sql.Open("sqlite3", "file::memory:?_foreign_keys=on")
 	// não deve retornar erro
 	s.Nil(err)
 	// setando o db
 	s.db = db
 	// criando as tabelas
-	db.Exec("Create table clients (id varchar(255), name varchar(255), email varchar(255), created_at date)")
-	db.Exec("Create table accounts (id varchar(255), client_id varchar(255), balance int, created_at date)")
+	db.Exec("Create table clients (id varchar(255), name varchar(255), email varchar(255), created_at date, primary key (id))")
+	db.Exec("Create table accounts (id varchar(255), client_id varchar(255), balance int, created_at date, primary key (id), foreign key (client_id) references clients(id))")
 	// inicializando o repository
 	s.accountRepository = NewAccountRepository(db)
 	// criando um client

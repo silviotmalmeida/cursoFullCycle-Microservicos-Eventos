@@ -1,5 +1,5 @@
 // nome do pacote (está sendo utilizado o nome da referida pasta)
-package create_transaction
+package create_transaction_uow
 
 // dependências
 import (
@@ -16,7 +16,7 @@ import (
 // testes de unidade
 
 // teste de execução com sucesso
-func TestCreateTransactionUseCase_Execute(t *testing.T) {
+func TestCreateTransactionUseCaseUow_Execute(t *testing.T) {
 	// criando o client 1
 	client1, _ := entity.NewClient("client1", "j@j.com")
 	// criando o account 1
@@ -48,7 +48,7 @@ func TestCreateTransactionUseCase_Execute(t *testing.T) {
 	// criando o event
 	transactionCreatedEvent := event.NewTransactionCreatedEvent()
 	// criando o usecase
-	uc := NewCreateTransactionUseCase(transactionGatewayMock, accountGatewayMock, eventDispatcher, transactionCreatedEvent)
+	uc := NewCreateTransactionUseCaseUow(transactionGatewayMock, accountGatewayMock, eventDispatcher, transactionCreatedEvent)
 	// definindo o input
 	input := &CreateTransactionInputDTO{
 		AccountIDFrom: account1.ID,

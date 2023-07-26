@@ -25,16 +25,16 @@ type TransactionRepositoryTestSuite struct {
 // função de criação da suíte
 // será executado antes de cada teste da suíte
 func (s *TransactionRepositoryTestSuite) SetupSuite() {
-	// definindo o db como sqlite em memória
-	db, err := sql.Open("sqlite3", ":memory:")
+	// definindo o db como sqlite em memória, com as restrições de chave estrangeira ativadas
+	db, err := sql.Open("sqlite3", "file::memory:?_foreign_keys=on")
 	// não deve retornar erro
 	s.Nil(err)
 	// setando o db
 	s.db = db
 	// criando as tabelas
-	db.Exec("Create table clients (id varchar(255), name varchar(255), email varchar(255), created_at date)")
-	db.Exec("Create table accounts (id varchar(255), client_id varchar(255), balance int, created_at date)")
-	db.Exec("Create table transactions (id varchar(255), account_id_from varchar(255), account_id_to varchar(255), amount int, created_at date)")
+	db.Exec("Create table clients (id varchar(255), name varchar(255), email varchar(255), created_at date, primary key (id))")
+	db.Exec("Create table accounts (id varchar(255), client_id varchar(255), balance int, created_at date, primary key (id), foreign key (client_id) references clients(id))")
+	db.Exec("Create table transactions (id varchar(255), account_id_from varchar(255), account_id_to varchar(255), amount int, created_at date, primary key (id), foreign key (account_id_from) references accounts(id), foreign key (account_id_to) references accounts(id))")
 	// criando e atribuindo os clients
 	client, err := entity.NewClient("John", "j@j.com")
 	s.Nil(err)

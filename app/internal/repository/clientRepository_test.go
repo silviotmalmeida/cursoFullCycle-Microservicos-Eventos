@@ -22,14 +22,14 @@ type ClientRepositoryTestSuite struct {
 // função de criação da suíte
 // será executado antes de cada teste da suíte
 func (s *ClientRepositoryTestSuite) SetupSuite() {
-	// definindo o db como sqlite em memória
-	db, err := sql.Open("sqlite3", ":memory:")
+	// definindo o db como sqlite em memória, com as restrições de chave estrangeira ativadas
+	db, err := sql.Open("sqlite3", "file::memory:?_foreign_keys=on")
 	// não deve retornar erro
 	s.Nil(err)
 	// setando o db
 	s.db = db
 	// criando a tabela
-	db.Exec("Create table clients (id varchar(255), name varchar(255), email varchar(255), created_at date)")
+	db.Exec("Create table clients (id varchar(255), name varchar(255), email varchar(255), created_at date, primary key (id))")
 	// inicializando o repository
 	s.clientRepository = NewClientRepository(db)
 }
