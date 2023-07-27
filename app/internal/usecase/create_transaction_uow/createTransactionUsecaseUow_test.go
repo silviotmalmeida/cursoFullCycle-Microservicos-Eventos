@@ -17,7 +17,7 @@ import (
 // testes de unidade
 
 // teste de execução com sucesso
-func TestCreateTransactionUseCaseUow_Execute(t *testing.T) {
+func TestCreateTransactionUowUseCase_Execute(t *testing.T) {
 	// criando o client 1
 	client1, _ := entity.NewClient("client1", "j@j.com")
 	// criando o account 1
@@ -49,7 +49,7 @@ func TestCreateTransactionUseCaseUow_Execute(t *testing.T) {
 	// criando o contexto
 	ctx := context.Background()
 	// criando o usecase
-	uc := NewCreateTransactionUseCaseUow(mockUow, eventDispatcher, eventTransaction, eventBalance)
+	uc := NewCreateTransactionUowUseCase(mockUow, eventDispatcher, eventTransaction, eventBalance)
 	// executando o usecase
 	output, err := uc.Execute(ctx, inputDto)
 	// não deve retornar erro
@@ -57,6 +57,6 @@ func TestCreateTransactionUseCaseUow_Execute(t *testing.T) {
 	// deve retornar um output válido
 	assert.NotNil(t, output)
 	mockUow.AssertExpectations(t)
-	// o método Do do mock deve ter sido chamado 1 VEZ
+	// o método Do do mock deve ter sido chamado 1 vez
 	mockUow.AssertNumberOfCalls(t, "Do", 1)
 }

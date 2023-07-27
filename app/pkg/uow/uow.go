@@ -52,17 +52,10 @@ func (u *Uow) UnRegister(name string) {
 
 // método para chamada dos repositories, associados em uma transação
 func (u *Uow) GetRepository(ctx context.Context, name string) (interface{}, error) {
-	// se ainda não existir a transação
+	// caso não exista transação associada ao uow
 	if u.Tx == nil {
-		// inicia a transação
-		tx, err := u.Db.BeginTx(ctx, nil)
-		// em caso de erro
-		if err != nil {
-			// não atribui a transação ao uow e retorna o erro
-			return nil, err
-		}
-		// atribui a transação ao uow
-		u.Tx = tx
+		// retorna o erro
+		return nil, errors.New("no transaction created")
 	}
 	// obtém o repository associado à transação
 	repo := u.Repositories[name](u.Tx)

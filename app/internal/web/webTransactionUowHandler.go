@@ -6,29 +6,29 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos/internal/usecase/create_transaction"
+	"github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos/internal/usecase/create_transaction_uow"
 )
 
 // definindo a estrutura (similar à classe)
 // responsável por tratar as requisições do endpoint "/transactions"
-type WebTransactionHandler struct {
+type WebTransactionUowHandler struct {
 	// definindo os atributos e seus tipos
-	CreateTransactionUseCase create_transaction.CreateTransactionUseCase
+	CreateTransactionUowUseCase create_transaction_uow.CreateTransactionUowUseCase
 }
 
 // definindo o método contrutor
 // devem ser descritos os argumentos e retornos
-func NewWebTransactionHandler(createTransactionUseCase create_transaction.CreateTransactionUseCase) *WebTransactionHandler {
+func NewWebTransactionUowHandler(createTransactionUowUseCase create_transaction_uow.CreateTransactionUowUseCase) *WebTransactionUowHandler {
 	// criando
-	return &WebTransactionHandler{
-		CreateTransactionUseCase: createTransactionUseCase,
+	return &WebTransactionUowHandler{
+		CreateTransactionUowUseCase: createTransactionUowUseCase,
 	}
 }
 
 // função responsável por criar uma transaction
-func (h *WebTransactionHandler) CreateTransaction(w http.ResponseWriter, r *http.Request) {
+func (h *WebTransactionUowHandler) CreateTransaction(w http.ResponseWriter, r *http.Request) {
 	// inicializando a variável de input
-	var dto create_transaction.CreateTransactionInputDTO
+	var dto create_transaction_uow.CreateTransactionInputDTO
 	// populando o input a partir dos dados do body do request
 	err := json.NewDecoder(r.Body).Decode(&dto)
 	// em caso de erro
@@ -38,8 +38,10 @@ func (h *WebTransactionHandler) CreateTransaction(w http.ResponseWriter, r *http
 		// encerra
 		return
 	}
+	// criando o context
+	ctx := r.Context()
 	// executando o usecase
-	output, err := h.CreateTransactionUseCase.Execute(&dto)
+	output, err := h.CreateTransactionUowUseCase.Execute(ctx, dto)
 	// em caso de erro
 	if err != nil {
 		// preenche o header do response com o erro

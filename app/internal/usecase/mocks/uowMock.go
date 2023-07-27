@@ -1,5 +1,7 @@
+// nome do pacote (está sendo utilizado o nome da referida pasta)
 package mocks
 
+// dependências
 import (
 	"context"
 
@@ -7,17 +9,13 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+// definindo o mock
 type UowMock struct {
 	mock.Mock
 }
 
-// Register(name string, fc RepositoryFactory)
-// GetRepository(ctx context.Context, name string) (interface{}, error)
-// Do(ctx context.Context, fn func(uow *Uow) error) error
-// CommitOrRollback() error
-// Rollback() error
-// UnRegister(name string)
-
+// definindo os comportamentos do mock
+// -----------------------------------------------------------------
 func (m *UowMock) Register(name string, fc uow.RepositoryFactory) {
 	m.Called(name, fc)
 }
@@ -45,3 +43,5 @@ func (m *UowMock) Rollback() error {
 func (m *UowMock) UnRegister(name string) {
 	m.Called(name)
 }
+
+// -----------------------------------------------------------------

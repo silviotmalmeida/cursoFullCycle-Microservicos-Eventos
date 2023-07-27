@@ -3,6 +3,7 @@ package main
 
 // dependências
 import (
+	"context"
 	"database/sql"
 	"fmt"
 
@@ -10,16 +11,17 @@ import (
 	"github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos/internal/repository"
 	"github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos/internal/usecase/create_account"
 	"github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos/internal/usecase/create_client"
-	"github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos/internal/usecase/create_transaction"
+	"github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos/internal/usecase/create_transaction_uow"
 	"github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos/internal/web"
 	"github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos/internal/web/webserver"
 	"github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos/pkg/events"
+	"github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos/pkg/uow"
 
 	_ "github.com/go-sql-driver/mysql"
 )
 
 // função responsável pela criação de um servidor web
-// versão sem o gerenciamento da transação com unity of work - uow
+// versão com o gerenciamento da transação com unity of work - uow
 func main() {
 	// criando a conexão com o bd
 	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local", "root", "root", "mysql", "3306", "wallet"))
@@ -31,21 +33,43 @@ func main() {
 	// no fim da execução, fecha a conexão
 	defer db.Close()
 
+	// configMap := ckafka.ConfigMap{
+	// 	"bootstrap.servers": "kafka:29092",
+	// 	"group.id":          "wallet",
+	// }
+	// kafkaProducer := kafka.NewKafkaProducer(&configMap)
+
 	// criando o gerenciador de eventos
 	eventDispatcher := events.NewEventDispatcher()
 
-	// criando o evento de transactionCreated
+	// criando os eventos
 	transactionCreatedEvent := event.NewTransactionCreatedEvent()
+	balanceUpdatedEvent := event.NewBalanceUpdatedEvent()
+
+	// eventDispatcher.Register("TransactionCreated", handler.NewTransactionCreatedKafkaHandler(kafkaProducer))
+	// eventDispatcher.Register("BalanceUpdated", handler.NewUpdateBalanceKafkaHandler(kafkaProducer))
 
 	// criando os repositories
 	clientDb := repository.NewClientRepository(db)
 	accountDb := repository.NewAccountRepository(db)
-	transactionDb := repository.NewTransactionRepository(db)
+
+	// criando o centext
+	ctx := context.Background()
+	// criando o gerenciador da transação uow
+	uow := uow.NewUow(ctx, db)
+
+	// registrando os repositories no uow
+	uow.Register("AccountDB", func(tx *sql.Tx) interface{} {
+		return repository.NewAccountRepository(db)
+	})
+	uow.Register("TransactionDB", func(tx *sql.Tx) interface{} {
+		return repository.NewTransactionRepository(db)
+	})
 
 	// criando os usecases
 	createClientUseCase := create_client.NewCreateClientUseCase(clientDb)
 	createAccountUseCase := create_account.NewCreateAccountUseCase(accountDb, clientDb)
-	createTransactionUseCase := create_transaction.NewCreateTransactionUseCase(transactionDb, accountDb, eventDispatcher, transactionCreatedEvent)
+	createTransactionUowUseCase := create_transaction_uow.NewCreateTransactionUowUseCase(uow, eventDispatcher, transactionCreatedEvent, balanceUpdatedEvent)
 
 	// criando o webserver e definindo a porta a ser utilizada
 	port := "8080"
@@ -54,7 +78,7 @@ func main() {
 	// criando os handlers dos endpoints
 	clientHandler := web.NewWebClientHandler(*createClientUseCase)
 	accountHandler := web.NewWebAccountHandler(*createAccountUseCase)
-	transactionHandler := web.NewWebTransactionHandler(*createTransactionUseCase)
+	transactionHandler := web.NewWebTransactionUowHandler(*createTransactionUowUseCase)
 
 	// adicionando os handlers ao webserver e configurando os endpoints
 	webserver.AddHandler("/clients", clientHandler.CreateClient)

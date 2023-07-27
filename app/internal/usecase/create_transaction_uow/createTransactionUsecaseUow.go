@@ -38,7 +38,7 @@ type BalanceUpdatedOutputDTO struct {
 }
 
 // definindo o usecase (com o gerenciamento da transação com unity of work)
-type CreateTransactionUseCaseUow struct {
+type CreateTransactionUowUseCase struct {
 	Uow                     uow.UowInterface
 	EventDispatcher         events.EventDispatcherInterface
 	TransactionCreatedEvent events.EventInterface
@@ -47,13 +47,13 @@ type CreateTransactionUseCaseUow struct {
 
 // definindo o método contrutor (com o gerenciamento da transação com unity of work)
 // devem ser descritos os argumentos e retornos
-func NewCreateTransactionUseCaseUow(
+func NewCreateTransactionUowUseCase(
 	uow uow.UowInterface,
 	eventDispatcher events.EventDispatcherInterface,
 	transactionCreatedEvent events.EventInterface,
 	balanceUpdatedEvent events.EventInterface,
-) *CreateTransactionUseCaseUow {
-	return &CreateTransactionUseCaseUow{
+) *CreateTransactionUowUseCase {
+	return &CreateTransactionUowUseCase{
 		Uow:                     uow,
 		EventDispatcher:         eventDispatcher,
 		TransactionCreatedEvent: transactionCreatedEvent,
@@ -63,7 +63,7 @@ func NewCreateTransactionUseCaseUow(
 
 // função de execução do usecase (com o gerenciamento da transação com unity of work - uow)
 // devem ser descritos a estrutura associada, os argumentos e retornos
-func (uc *CreateTransactionUseCaseUow) Execute(ctx context.Context, input CreateTransactionInputDTO) (*CreateTransactionOutputDTO, error) {
+func (uc *CreateTransactionUowUseCase) Execute(ctx context.Context, input CreateTransactionInputDTO) (*CreateTransactionOutputDTO, error) {
 	// inicializando os outputs
 	output := &CreateTransactionOutputDTO{}
 	balanceUpdatedOutput := &BalanceUpdatedOutputDTO{}
@@ -139,7 +139,7 @@ func (uc *CreateTransactionUseCaseUow) Execute(ctx context.Context, input Create
 }
 
 // método para obtenção de um AccountRepository registrado no Uow
-func (uc *CreateTransactionUseCaseUow) getAccountRepository(ctx context.Context) gateway.AccountGateway {
+func (uc *CreateTransactionUowUseCase) getAccountRepository(ctx context.Context) gateway.AccountGateway {
 	// obtendo o repository
 	repo, err := uc.Uow.GetRepository(ctx, "AccountDB")
 	// em caso de erro
@@ -152,7 +152,7 @@ func (uc *CreateTransactionUseCaseUow) getAccountRepository(ctx context.Context)
 }
 
 // método para obtenção de um TransactionRepository registrado no Uow
-func (uc *CreateTransactionUseCaseUow) getTransactionRepository(ctx context.Context) gateway.TransactionGateway {
+func (uc *CreateTransactionUowUseCase) getTransactionRepository(ctx context.Context) gateway.TransactionGateway {
 	// obtendo o repository
 	repo, err := uc.Uow.GetRepository(ctx, "TransactionDB")
 	// em caso de erro

@@ -32,7 +32,7 @@ func NewAccount(client *Client) *Account {
 		ID:        uuid.New().String(),
 		Client:    client,
 		ClientID:  client.ID,
-		Balance:   0,
+		Balance:   1000,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}

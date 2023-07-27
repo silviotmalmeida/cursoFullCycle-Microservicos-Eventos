@@ -1,6 +1,6 @@
 #!/bin/bash
 
 echo "Iniciando os testes..."
-docker exec -it goapp go mod tidy
+source runGoModTidy.sh
 # docker exec -it goapp go test -v ./...
 docker exec -it goapp go test ./...
