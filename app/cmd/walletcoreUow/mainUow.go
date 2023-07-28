@@ -1,4 +1,4 @@
-// nome do pacote
+// nome do pacote (está sendo usado main pois trata-se de entrypoint da aplicação)
 package main
 
 // dependências
@@ -8,6 +8,7 @@ import (
 	"fmt"
 
 	"github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos/internal/event"
+	"github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos/internal/event/handler"
 	"github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos/internal/repository"
 	"github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos/internal/usecase/create_account"
 	"github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos/internal/usecase/create_client"
@@ -15,9 +16,12 @@ import (
 	"github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos/internal/web"
 	"github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos/internal/web/webserver"
 	"github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos/pkg/events"
+	"github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos/pkg/kafka"
 	"github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos/pkg/uow"
 
 	_ "github.com/go-sql-driver/mysql"
+
+	ckafka "github.com/confluentinc/confluent-kafka-go/kafka"
 )
 
 // função responsável pela criação de um servidor web
@@ -33,11 +37,13 @@ func main() {
 	// no fim da execução, fecha a conexão
 	defer db.Close()
 
-	// configMap := ckafka.ConfigMap{
-	// 	"bootstrap.servers": "kafka:29092",
-	// 	"group.id":          "wallet",
-	// }
-	// kafkaProducer := kafka.NewKafkaProducer(&configMap)
+	// iniciando o kafka
+	configMap := ckafka.ConfigMap{
+		"bootstrap.servers": "kafka:29092",
+		"group.id":          "wallet",
+	}
+	// criando o producer
+	kafkaProducer := kafka.NewKafkaProducer(&configMap)
 
 	// criando o gerenciador de eventos
 	eventDispatcher := events.NewEventDispatcher()
@@ -46,8 +52,9 @@ func main() {
 	transactionCreatedEvent := event.NewTransactionCreatedEvent()
 	balanceUpdatedEvent := event.NewBalanceUpdatedEvent()
 
-	// eventDispatcher.Register("TransactionCreated", handler.NewTransactionCreatedKafkaHandler(kafkaProducer))
-	// eventDispatcher.Register("BalanceUpdated", handler.NewUpdateBalanceKafkaHandler(kafkaProducer))
+	// registrando os eventos e respectivos handlers
+	eventDispatcher.Register("TransactionCreated", handler.NewTransactionCreatedKafkaHandler(kafkaProducer))
+	eventDispatcher.Register("BalanceUpdated", handler.NewUpdateBalanceKafkaHandler(kafkaProducer))
 
 	// criando os repositories
 	clientDb := repository.NewClientRepository(db)

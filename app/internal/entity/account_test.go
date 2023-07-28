@@ -36,16 +36,16 @@ func TestCreditAccount(t *testing.T) {
 	client, _ := NewClient("John Doe", "j@j")
 	// criando o account
 	account := NewAccount(client)
-	// o balance inicial deve ser zero
-	assert.Equal(t, float64(0), account.Balance)
+	// o balance inicial deve ser 1000
+	assert.Equal(t, float64(1000), account.Balance)
 	// creditando o balance
 	account.Credit(100)
 	// o valor incrementado deve corresponder ao que foi creditado
-	assert.Equal(t, float64(100), account.Balance)
+	assert.Equal(t, float64(1100), account.Balance)
 	// creditando o balance
 	account.Credit(50)
 	// o valor incrementado deve corresponder ao que foi creditado
-	assert.Equal(t, float64(150), account.Balance)
+	assert.Equal(t, float64(1150), account.Balance)
 }
 
 // teste de débito com sucesso
@@ -54,18 +54,18 @@ func TestDebitAccount(t *testing.T) {
 	client, _ := NewClient("John Doe", "j@j")
 	// criando o account
 	account := NewAccount(client)
-	// o balance inicial deve ser zero
-	assert.Equal(t, float64(0), account.Balance)
+	// o balance inicial deve ser 1000
+	assert.Equal(t, float64(1000), account.Balance)
 	// creditando o balance
 	account.Credit(100)
 	// o valor incrementado deve corresponder ao que foi creditado
-	assert.Equal(t, float64(100), account.Balance)
+	assert.Equal(t, float64(1100), account.Balance)
 	// debitando o balance
 	account.Debit(50)
 	// o valor decrementado deve corresponder ao que foi debitado
-	assert.Equal(t, float64(50), account.Balance)
+	assert.Equal(t, float64(1050), account.Balance)
 	// debitando o balance
 	account.Debit(20)
 	// o valor decrementado deve corresponder ao que foi debitado
-	assert.Equal(t, float64(30), account.Balance)
+	assert.Equal(t, float64(1030), account.Balance)
 }

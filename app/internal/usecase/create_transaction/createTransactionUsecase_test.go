@@ -45,10 +45,11 @@ func TestCreateTransactionUseCase_Execute(t *testing.T) {
 	transactionGatewayMock.On("Create", mock.Anything).Return(nil)
 	// criando o dispatcher
 	eventDispatcher := events.NewEventDispatcher()
-	// criando o event
+	// criando os events
 	transactionCreatedEvent := event.NewTransactionCreatedEvent()
+	balanceUpdatedEvent := event.NewBalanceUpdatedEvent()
 	// criando o usecase
-	uc := NewCreateTransactionUseCase(transactionGatewayMock, accountGatewayMock, eventDispatcher, transactionCreatedEvent)
+	uc := NewCreateTransactionUseCase(transactionGatewayMock, accountGatewayMock, eventDispatcher, transactionCreatedEvent, balanceUpdatedEvent)
 	// definindo o input
 	input := &CreateTransactionInputDTO{
 		AccountIDFrom: account1.ID,

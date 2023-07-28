@@ -30,8 +30,8 @@ func TestCreateTransaction(t *testing.T) {
 	// deve retornar uma transaction válida
 	assert.NotNil(t, transaction)
 	// validando os balances após a transaction
-	assert.Equal(t, 1100.0, account2.Balance)
-	assert.Equal(t, 900.0, account1.Balance)
+	assert.Equal(t, 2100.0, account2.Balance)
+	assert.Equal(t, 1900.0, account1.Balance)
 }
 
 // teste de criação sem sucesso, balance insuficiente
@@ -48,13 +48,13 @@ func TestCreateTransactionWithInsuficientBalance(t *testing.T) {
 	account1.Credit(1000)
 	account2.Credit(1000)
 	// realizando a transaction
-	transaction, err := NewTransaction(account1, account2, 2000)
+	transaction, err := NewTransaction(account1, account2, 3000)
 	// deve retornar erro
 	assert.NotNil(t, err)
 	assert.EqualError(t, err, "insufficient funds")
 	// não deve retornar a transaction
 	assert.Nil(t, transaction)
 	// validando os balances após a transaction (inalterados)
-	assert.Equal(t, 1000.0, account2.Balance)
-	assert.Equal(t, 1000.0, account1.Balance)
+	assert.Equal(t, 2000.0, account2.Balance)
+	assert.Equal(t, 2000.0, account1.Balance)
 }

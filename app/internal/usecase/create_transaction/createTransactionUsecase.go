@@ -25,12 +25,22 @@ type CreateTransactionOutputDTO struct {
 	Amount        float64 `json:"amount"`
 }
 
+// definindo os dados de output
+// foram incluídas as customizações dos nomes dos atributos ao converter para json
+type BalanceUpdatedOutputDTO struct {
+	AccountIDFrom        string  `json:"account_id_from"`
+	AccountIDTo          string  `json:"account_id_to"`
+	BalanceAccountIDFrom float64 `json:"balance_account_id_from"`
+	BalanceAccountIDTo   float64 `json:"balance_account_id_to"`
+}
+
 // definindo o usecase (sem o gerenciamento da transação com unity of work)
 type CreateTransactionUseCase struct {
 	TransactionGateway      gateway.TransactionGateway
 	AccountGateway          gateway.AccountGateway
 	EventDispatcher         events.EventDispatcherInterface
 	TransactionCreatedEvent events.EventInterface
+	BalanceUpdatedEvent     events.EventInterface
 }
 
 // definindo o método contrutor (sem o gerenciamento da transação com unity of work)
@@ -39,18 +49,24 @@ func NewCreateTransactionUseCase(
 	transactionGateway gateway.TransactionGateway,
 	accountGateway gateway.AccountGateway,
 	eventDispatcher events.EventDispatcherInterface,
-	transactionCreatedEvent events.EventInterface) *CreateTransactionUseCase {
+	transactionCreatedEvent events.EventInterface,
+	balanceUpdatedEvent events.EventInterface,
+) *CreateTransactionUseCase {
 	return &CreateTransactionUseCase{
 		TransactionGateway:      transactionGateway,
 		AccountGateway:          accountGateway,
 		EventDispatcher:         eventDispatcher,
 		TransactionCreatedEvent: transactionCreatedEvent,
+		BalanceUpdatedEvent:     balanceUpdatedEvent,
 	}
 }
 
 // função de execução do usecase (sem o gerenciamento da transação com unity of work - uow)
 // devem ser descritos a estrutura associada, os argumentos e retornos
 func (uc *CreateTransactionUseCase) Execute(input *CreateTransactionInputDTO) (*CreateTransactionOutputDTO, error) {
+	// inicializando os outputs
+	output := &CreateTransactionOutputDTO{}
+	balanceUpdatedOutput := &BalanceUpdatedOutputDTO{}
 	// consultando o accountFrom
 	accountFrom, err := uc.AccountGateway.FindByID(input.AccountIDFrom)
 	// se existirem erros, retorna somente o erro
@@ -88,16 +104,22 @@ func (uc *CreateTransactionUseCase) Execute(input *CreateTransactionInputDTO) (*
 		return nil, err
 	}
 	// organizando o output
-	output := &CreateTransactionOutputDTO{
-		ID:            transaction.ID,
-		AccountIDFrom: transaction.AccountFromID,
-		AccountIDTo:   transaction.AccountToID,
-		Amount:        transaction.Amount,
-	}
+	output.ID = transaction.ID
+	output.AccountIDFrom = input.AccountIDFrom
+	output.AccountIDTo = input.AccountIDTo
+	output.Amount = input.Amount
+	balanceUpdatedOutput.AccountIDFrom = input.AccountIDFrom
+	balanceUpdatedOutput.AccountIDTo = input.AccountIDTo
+	balanceUpdatedOutput.BalanceAccountIDFrom = accountFrom.Balance
+	balanceUpdatedOutput.BalanceAccountIDTo = accountTo.Balance
 	// populando o evento com o output do usecase
 	uc.TransactionCreatedEvent.SetPayload(output)
 	// disparando as ações associadas ao evento TransactionCreatedEvent
 	uc.EventDispatcher.Dispatch(uc.TransactionCreatedEvent)
+	// populando o evento BalanceUpdatedEvent com o output do usecase
+	uc.BalanceUpdatedEvent.SetPayload(balanceUpdatedOutput)
+	// disparando as ações associadas ao evento BalanceUpdatedEvent
+	uc.EventDispatcher.Dispatch(uc.BalanceUpdatedEvent)
 	// retornando o output, com erro nulo
 	return output, nil
 }
