@@ -24,3 +24,10 @@ func NewAccount(id string, balance float64) *Account {
 	// retorna a estrutura
 	return account
 }
+
+// função de atualização de balance
+// devem ser descritos a estrutura associada, os argumentos e retornos
+func (a *Account) SetBalance(balance float64) {
+	// incrementa o balance
+	a.Balance = balance
+}
