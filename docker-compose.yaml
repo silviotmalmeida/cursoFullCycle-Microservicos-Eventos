@@ -11,6 +11,16 @@ services:
     ports:
       - 8080:8080
 
+  goclientapp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: goclientapp
+    volumes:
+      - ./client_app:/go/src/
+    ports:
+      - 3003:3003
+
   mysql:
     image: mysql:5.7
     environment:
