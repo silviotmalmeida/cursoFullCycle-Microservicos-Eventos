@@ -51,19 +51,19 @@ func TestAccountRepositoryTestSuite(t *testing.T) {
 // testes de unidade
 
 // teste de criação com sucesso
-func (s *AccountRepositoryTestSuite) TestSave() {
+func (s *AccountRepositoryTestSuite) Test1Save() {
 	// criando a account
 	account := entity.NewAccount("123", 100.0)
 	// salvando no db
 	err := s.accountRepository.Save(account)
 	// não deve retornar erro
-	s.Nil(err)
+	s.Nil(err)	
 }
 
 // teste de busca por id com sucesso
-func (s *AccountRepositoryTestSuite) TestFindByID() {
+func (s *AccountRepositoryTestSuite) Test2FindByID() {
 	// criando a account
-	account := entity.NewAccount("456", 100.0)
+	account := entity.NewAccount("456", 200.0)
 	// salvando no db
 	err := s.accountRepository.Save(account)
 	// não deve retornar erro
@@ -78,9 +78,9 @@ func (s *AccountRepositoryTestSuite) TestFindByID() {
 }
 
 // teste de atualização de Balance com sucesso
-func (s *AccountRepositoryTestSuite) TestUpdateBalance() {
+func (s *AccountRepositoryTestSuite) Test3UpdateBalance() {
 	// criando a account
-	account := entity.NewAccount("789", 100.0)
+	account := entity.NewAccount("789", 300.0)
 	// salvando no db
 	err := s.accountRepository.Save(account)
 	// não deve retornar erro
@@ -97,4 +97,19 @@ func (s *AccountRepositoryTestSuite) TestUpdateBalance() {
 	s.Nil(err)
 	// os atributos devem estar consistentes com a entrada
 	s.Equal(account.Balance, accountDB.Balance)
+}
+
+// teste de listagem com sucesso
+func (s *AccountRepositoryTestSuite) Test4List() {	
+	// consultando no db
+	accountDB, err := s.accountRepository.List()
+	// não deve retornar erro
+	s.Nil(err)
+	// os atributos devem estar consistentes com a entrada
+	s.Equal("123", accountDB[0].ID)
+	s.Equal(100.0, accountDB[0].Balance)
+	s.Equal("456", accountDB[1].ID)
+	s.Equal(200.0, accountDB[1].Balance)
+	s.Equal("789", accountDB[2].ID)
+	s.Equal(150.0, accountDB[2].Balance)
 }

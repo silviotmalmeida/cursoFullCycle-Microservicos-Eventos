@@ -36,3 +36,12 @@ func (m *AccountGatewayMock) UpdateBalance(account *entity.Account) error {
 	// retorna como argumento 0 um erro
 	return args.Error(0)
 }
+
+// definindo o comportamento do List do mock
+func (m *AccountGatewayMock) List() ([]*entity.Account, error) {
+	// não recebe nenhum argumento
+	args := m.Called()
+	// retorna como argumento 0 uma lista de account
+	// retorna como argumento 1 um erro
+	return args.Get(0).([]*entity.Account), args.Error(1)
+}

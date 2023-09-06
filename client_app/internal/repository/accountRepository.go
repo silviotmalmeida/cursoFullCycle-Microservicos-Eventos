@@ -91,3 +91,32 @@ func (a *AccountRepository) UpdateBalance(account *entity.Account) error {
 	// não retorna erro
 	return nil
 }
+
+// função de listagem
+// devem ser descritos a estrutura associada, os argumentos e retornos
+func (a *AccountRepository) List() ([]*entity.Account, error) {
+	// criando um array de account vazio
+	accounts := []*entity.Account{}
+	// abrindo a conexão e preparando a query
+	rows, err := a.DB.Query("SELECT id, balance FROM accounts")
+	// em caso de erro, retorna somente o erro
+	if err != nil {
+		return nil, err
+	}
+	
+	for rows.Next() {
+		var id string
+		var balance float64
+		err2 := rows.Scan(&id, &balance)
+		if err2 != nil {
+			return nil, err2
+		} 
+		account := entity.NewAccount(id, balance)
+		accounts = append(accounts, account)
+		
+	}
+	// deve-se fechar a conexão ao final da função
+	defer rows.Close()
+	
+	return accounts, nil
+}
