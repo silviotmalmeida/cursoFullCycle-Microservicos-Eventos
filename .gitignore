@@ -21,3 +21,4 @@ vendor/
 go.work
 
 app/docker
+client_app/docker

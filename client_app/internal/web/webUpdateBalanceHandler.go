@@ -7,29 +7,29 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos-Desafio/internal/usecase/create_account"
+	"github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos-Desafio/internal/usecase/update_balance"
 )
 
 // definindo a estrutura (similar à classe)
-// responsável por tratar as requisições do endpoint "/create-account"
-type WebCreateAccountHandler struct {
+// responsável por tratar as requisições do endpoint "/update-balance"
+type WebUpdateBalanceHandler struct {
 	// definindo os atributos e seus tipos
-	CreateAccountUseCase create_account.CreateAccountUseCase
+	UpdateBalanceUseCase update_balance.UpdateBalanceUseCase
 }
 
 // definindo o método contrutor
 // devem ser descritos os argumentos e retornos
-func NewWebCreateAccountHandler(createAccountUseCase create_account.CreateAccountUseCase) *WebCreateAccountHandler {
+func NewWebUpdateBalanceHandler(createAccountUseCase update_balance.UpdateBalanceUseCase) *WebUpdateBalanceHandler {
 	// criando
-	return &WebCreateAccountHandler{
-		CreateAccountUseCase: createAccountUseCase,
+	return &WebUpdateBalanceHandler{
+		UpdateBalanceUseCase: createAccountUseCase,
 	}
 }
 
-// função responsável por criar um account
-func (h *WebCreateAccountHandler) CreateAccount(w http.ResponseWriter, r *http.Request) {
+// função responsável por atualizar o balance de um account
+func (h *WebUpdateBalanceHandler) UpdateBalance(w http.ResponseWriter, r *http.Request) {
 	// inicializando a variável de input
-	var dto create_account.CreateAccountInputDTO
+	var dto update_balance.UpdateBalanceInputDTO
 	// populando o input a partir dos dados do body do request
 	err := json.NewDecoder(r.Body).Decode(&dto)
 	// em caso de erro
@@ -42,7 +42,7 @@ func (h *WebCreateAccountHandler) CreateAccount(w http.ResponseWriter, r *http.R
 
 	fmt.Println(&dto)
 	// executando o usecase
-	output, err := h.CreateAccountUseCase.Execute(&dto)
+	output, err := h.UpdateBalanceUseCase.Execute(&dto)
 	// em caso de erro
 	if err != nil {
 		// preenche o header do response com o erro
