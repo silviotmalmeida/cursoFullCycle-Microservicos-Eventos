@@ -1,4 +1,4 @@
-# criando o account
+# criando o account 1
 POST http://localhost:3003/create-account HTTP/1.1
 Content-Type: application/json
 
@@ -9,7 +9,18 @@ Content-Type: application/json
 
 ###
 
-# atualizando o balance
+# criando o account 2
+POST http://localhost:3003/create-account HTTP/1.1
+Content-Type: application/json
+
+{
+    "id": "dadasmçkfngçdfordsfasjdfnaçsdlkfns",
+    "balance": 150
+}
+
+###
+
+# atualizando o balance do account 1
 POST http://localhost:3003/update-balance HTTP/1.1
 Content-Type: application/json
 
@@ -21,4 +32,14 @@ Content-Type: application/json
 ###
 
 # listando os accounts
-POST http://localhost:3003/accounts HTTP/1.1
+GET http://localhost:3003/accounts HTTP/1.1
+
+###
+
+# buscando o account por id 1
+GET http://localhost:3003/accounts/17af204f-1e4c-4b0f-9654-2e60a51bb32f HTTP/1.1
+
+###
+
+# buscando o account por id 2
+GET http://localhost:3003/accounts/dadasmçkfngçdfordsfasjdfnaçsdlkfns HTTP/1.1

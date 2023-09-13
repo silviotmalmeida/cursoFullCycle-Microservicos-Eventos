@@ -12,6 +12,7 @@ import (
 	"github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos-Desafio/internal/usecase/create_account"
 	"github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos-Desafio/internal/usecase/list_accounts"
 	"github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos-Desafio/internal/usecase/update_balance"
+	"github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos-Desafio/internal/usecase/get_account"
 
 	// "github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos/internal/usecase/create_client"
 	// "github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos/internal/usecase/create_transaction"
@@ -63,6 +64,7 @@ func main() {
 	createAccountUseCase := create_account.NewCreateAccountUseCase(accountDb)
 	updateBalanceUseCase := update_balance.NewUpdateBalanceUseCase(accountDb)
 	listAccountsUseCase := list_accounts.NewListAccountsUseCase(accountDb)
+	getAccountUseCase := get_account.NewGetAccountUseCase(accountDb)
 
 	// criando o webserver e definindo a porta a ser utilizada
 	port := "3003"
@@ -72,11 +74,13 @@ func main() {
 	createAccountHandler := web.NewWebCreateAccountHandler(*createAccountUseCase)
 	updateBalanceHandler := web.NewWebUpdateBalanceHandler(*updateBalanceUseCase)
 	listAccountsHandler := web.NewWebListAccountsHandler(*listAccountsUseCase)
+	getAccountHandler := web.NewWebGetAccountHandler(*getAccountUseCase)
 
 	// adicionando os handlers ao webserver e configurando os endpoints
-	webserver.AddHandler("/create-account", createAccountHandler.CreateAccount)
-	webserver.AddHandler("/update-balance", updateBalanceHandler.UpdateBalance)
-	webserver.AddHandler("/accounts", listAccountsHandler.ListAccounts)
+	webserver.AddHandler("/create-account", createAccountHandler.CreateAccount, "POST")
+	webserver.AddHandler("/update-balance", updateBalanceHandler.UpdateBalance, "POST")
+	webserver.AddHandler("/accounts", listAccountsHandler.ListAccounts, "GET")
+	webserver.AddHandler("/accounts/{id}", getAccountHandler.GetAccount, "GET")
 
 	// inicializando o webserver
 	fmt.Println("Server is running on port", port)
