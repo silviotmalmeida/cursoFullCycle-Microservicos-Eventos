@@ -3,30 +3,37 @@ package main
 
 // dependências
 import (
+	"encoding/json"
 	"database/sql"
 	"fmt"
 
-	// "github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos/internal/event"
-	// "github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos/internal/event/handler"
 	"github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos-Desafio/internal/repository"
 	"github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos-Desafio/internal/usecase/create_account"
 	"github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos-Desafio/internal/usecase/list_accounts"
 	"github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos-Desafio/internal/usecase/update_balance"
 	"github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos-Desafio/internal/usecase/get_account"
 
-	// "github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos/internal/usecase/create_client"
-	// "github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos/internal/usecase/create_transaction"
 	"github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos-Desafio/internal/web"
 	"github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos-Desafio/internal/web/webserver"
 
-	// "github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos/pkg/events"
-	// "github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos/pkg/kafka"
-
 	_ "github.com/go-sql-driver/mysql"
+
+	ckafka "github.com/confluentinc/confluent-kafka-go/kafka"
 )
 
+// definindo a estrutura para recebimento da mensagem do tópico
+type Response struct{
+	Name string
+	Payload Payload
+}
+type Payload struct{
+	AccountIdFrom string `json:"account_id_from"`
+	AccountIdTo string `json:"account_id_to"`
+	BalanceAccountIdFrom float64 `json:"balance_account_id_from"`
+	BalanceAccountIdTo float64 `json:"balance_account_id_to"`
+}
+
 // função responsável pela criação de um servidor web
-// versão sem o gerenciamento da transação com unity of work - uow
 func main() {
 	// criando a conexão com o bd
 	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local", "root", "root", "mysql-client", "3306", "wallet"))
@@ -37,25 +44,6 @@ func main() {
 	}
 	// no fim da execução, fecha a conexão
 	defer db.Close()
-
-	// // iniciando o kafka
-	// configMap := ckafka.ConfigMap{
-	// 	"bootstrap.servers": "kafka:29092",
-	// 	"group.id":          "wallet",
-	// }
-	// // criando o producer
-	// kafkaProducer := kafka.NewKafkaProducer(&configMap)
-
-	// // criando o gerenciador de eventos
-	// eventDispatcher := events.NewEventDispatcher()
-
-	// // criando o evento de transactionCreated
-	// transactionCreatedEvent := event.NewTransactionCreatedEvent()
-	// balanceUpdatedEvent := event.NewBalanceUpdatedEvent()
-
-	// // registrando os eventos e respectivos handlers
-	// eventDispatcher.Register("TransactionCreated", handler.NewTransactionCreatedKafkaHandler(kafkaProducer))
-	// eventDispatcher.Register("BalanceUpdated", handler.NewUpdateBalanceKafkaHandler(kafkaProducer))
 
 	// criando os repositories
 	accountDb := repository.NewAccountRepository(db)
@@ -84,5 +72,88 @@ func main() {
 
 	// inicializando o webserver
 	fmt.Println("Server is running on port", port)
-	webserver.Start()
+	go webserver.Start()
+
+	// configurando o acesso ao kafka
+	configMap := &ckafka.ConfigMap{
+		"bootstrap.servers": "kafka:29092",
+		"client.id":         "client_app-consumer",
+		"group.id":          "client_app-group",
+	}
+	// lista de tópicos a serem lidos
+	topics := []string{"balances"}
+	// criando o consumer
+	fmt.Println("Initializing consumer...")
+	consumer, err := ckafka.NewConsumer(configMap)
+	if err != nil {
+		panic(err)
+	}
+	err = consumer.SubscribeTopics(topics, nil)
+	if err != nil {
+		panic(err)
+	}
+	for {
+		msg, err := consumer.ReadMessage(-1)
+		if err == nil {
+
+			var response Response
+			json.Unmarshal(msg.Value, &response)
+
+			// verificando se a account_from já está cadastrada
+			// definindo o input do usecase do get_account
+			inputGetFrom := &get_account.GetAccountInputDTO{
+				ID: response.Payload.AccountIdFrom,
+			}
+			// executando o usecase
+			_, err := getAccountUseCase.Execute(inputGetFrom)
+			// caso a account ainda não exista, deve-se criá-la
+			if err != nil {
+				// definindo o input do usecase do create_account
+				inputCreateFrom := &create_account.CreateAccountInputDTO{
+					ID: response.Payload.AccountIdFrom,
+					Balance: response.Payload.BalanceAccountIdFrom,
+				}
+				// executando o usecase
+				outputCreateFrom, _ := createAccountUseCase.Execute(inputCreateFrom)
+				fmt.Println("criado account_from", outputCreateFrom)				
+			} else{
+				// definindo o input do usecase do update_balance
+				inputUpdateFrom := &update_balance.UpdateBalanceInputDTO{
+					ID: response.Payload.AccountIdFrom,
+					Balance: response.Payload.BalanceAccountIdFrom,
+				}
+				// executando o usecase
+				outputUpdateFrom, _ := updateBalanceUseCase.Execute(inputUpdateFrom)
+				fmt.Println("atualizado account_from", outputUpdateFrom)				
+			}
+
+			// verificando se a account_to já está cadastrada
+			// definindo o input do usecase do get_account
+			inputGetTo := &get_account.GetAccountInputDTO{
+				ID: response.Payload.AccountIdTo,
+			}
+			// executando o usecase
+			_, err = getAccountUseCase.Execute(inputGetTo)
+			// caso a account ainda não exista, deve-se criá-la
+			if err != nil {
+				// definindo o input do usecase do create_account
+				inputCreateTo := &create_account.CreateAccountInputDTO{
+					ID: response.Payload.AccountIdTo,
+					Balance: response.Payload.BalanceAccountIdTo,
+				}
+				// executando o usecase
+				outputCreateTo, _ := createAccountUseCase.Execute(inputCreateTo)
+				fmt.Println("criado account_to", outputCreateTo)				
+			} else{
+				// definindo o input do usecase do update_balance
+				inputUpdateTo := &update_balance.UpdateBalanceInputDTO{
+					ID: response.Payload.AccountIdTo,
+					Balance: response.Payload.BalanceAccountIdTo,
+				}
+				// executando o usecase
+				outputUpdateTo, _ := updateBalanceUseCase.Execute(inputUpdateTo)
+				fmt.Println("atualizado account_to", outputUpdateTo)				
+			}
+		}
+	}
 }
