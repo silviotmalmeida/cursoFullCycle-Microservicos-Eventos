@@ -32,14 +32,14 @@ Content-Type: application/json
 ###
 
 # listando os accounts
-GET http://localhost:3003/accounts HTTP/1.1
+GET http://localhost:3003/balances HTTP/1.1
 
 ###
 
-# buscando o account por id 1
-GET http://localhost:3003/accounts/17af204f-1e4c-4b0f-9654-2e60a51bb32f HTTP/1.1
+# buscando o account por id
+GET http://localhost:3003/balances/17af204f-1e4c-4b0f-9654-2e60a51bb32f HTTP/1.1
 
 ###
 
 # buscando o account por id 2
-GET http://localhost:3003/accounts/dadasmçkfngçdfordsfasjdfnaçsdlkfns HTTP/1.1
+GET http://localhost:3003/balances/8ea7debb-6371-4a04-88af-8f9652ae5d66 HTTP/1.1

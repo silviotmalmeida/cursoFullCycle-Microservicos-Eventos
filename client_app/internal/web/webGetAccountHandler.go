@@ -5,13 +5,14 @@ package web
 import (
 	"encoding/json"
 	"net/http"
+
 	"github.com/go-chi/chi/v5"
 
 	"github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos-Desafio/internal/usecase/get_account"
 )
 
 // definindo a estrutura (similar à classe)
-// responsável por tratar as requisições do endpoint "/accounts/{id}"
+// responsável por tratar as requisições do endpoint "/balances/{id}"
 type WebGetAccountHandler struct {
 	// definindo os atributos e seus tipos
 	GetAccountUseCase get_account.GetAccountUseCase

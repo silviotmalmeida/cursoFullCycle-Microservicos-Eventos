@@ -10,7 +10,7 @@ import (
 )
 
 // definindo a estrutura (similar à classe)
-// responsável por tratar as requisições do endpoint "/accounts"
+// responsável por tratar as requisições do endpoint "/balances"
 type WebListAccountsHandler struct {
 	// definindo os atributos e seus tipos
 	ListAccountsUseCase list_accounts.ListAccountsUseCase

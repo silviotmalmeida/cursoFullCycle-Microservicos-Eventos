@@ -1,0 +1,76 @@
+# listando os accounts na aplicação cliente
+# nesta primeira execução deve retornar vazio
+GET http://localhost:3003/balances HTTP/1.1
+
+###
+
+# criando o client 1 no wallet core,
+# o id criado deverá ser utilizado na criação da respectiva account
+POST http://localhost:8080/clients HTTP/1.1
+Content-Type: application/json
+
+{
+    "name": "John Doe",
+    "email": "john@j.com"
+}
+
+###
+
+# criando o client 2 no wallet core
+# o id criado deverá ser utilizado na criação da respectiva account
+POST http://localhost:8080/clients HTTP/1.1
+Content-Type: application/json
+
+{
+    "name": "Jane Doe",
+    "email": "jane@j.com"
+}
+
+###
+
+# criando o account para o client 1
+# deverá ser utilizado o id criado do client 1
+POST http://localhost:8080/accounts HTTP/1.1
+Content-Type: application/json
+
+{
+    "client_id": "id-a-ser-informado"
+}
+
+###
+
+# criando o account para o client 2
+# deverá ser utilizado o id criado do client 2
+POST http://localhost:8080/accounts HTTP/1.1
+Content-Type: application/json
+
+{
+    "client_id": "id-a-ser-informado"
+}
+
+###
+
+# criando a transaction
+# deverão ser utilizados os id criados das accounts 1 e 2
+POST http://localhost:8080/transactions HTTP/1.1
+Content-Type: application/json
+
+{
+    "account_id_from": "id-a-ser-informado",
+    "account_id_to": "id-a-ser-informado",
+    "amount": 10
+}
+
+###
+
+# listando os accounts na aplicação cliente
+# deve retornar a lista de accounts, bem como os respectivos balances
+GET http://localhost:3003/balances HTTP/1.1
+
+###
+
+# buscando o account por id
+# deverá ser utilizado o id criado da account
+GET http://localhost:3003/balances/id-a-ser-informado HTTP/1.1
+
+###

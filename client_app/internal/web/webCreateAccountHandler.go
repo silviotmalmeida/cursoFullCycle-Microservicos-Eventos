@@ -4,7 +4,6 @@ package web
 // dependências
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos-Desafio/internal/usecase/create_account"
@@ -39,8 +38,6 @@ func (h *WebCreateAccountHandler) CreateAccount(w http.ResponseWriter, r *http.R
 		// encerra
 		return
 	}
-
-	fmt.Println(&dto)
 	// executando o usecase
 	output, err := h.CreateAccountUseCase.Execute(&dto)
 	// em caso de erro

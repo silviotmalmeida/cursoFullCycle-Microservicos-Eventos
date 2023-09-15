@@ -2,8 +2,6 @@
 package create_account
 
 import (
-	"fmt"
-
 	"github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos-Desafio/internal/entity"
 	"github.com/silviotmalmeida/cursoFullCycle-Microsservicos-Eventos-Desafio/internal/gateway"
 )
@@ -37,7 +35,6 @@ func NewCreateAccountUseCase(accountGateway gateway.AccountGateway) *CreateAccou
 func (uc *CreateAccountUseCase) Execute(input *CreateAccountInputDTO) (*CreateAccountOutputDTO, error) {
 	// criando a account
 	account := entity.NewAccount(input.ID, input.Balance)
-	fmt.Println(account)
 	// salvando no BD
 	err := uc.AccountGateway.Save(account)
 	// se existirem erros, retorna somente o erro
